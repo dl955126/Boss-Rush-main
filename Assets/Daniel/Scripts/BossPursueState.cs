@@ -49,6 +49,7 @@ namespace Daniel
             base.OnExit();
             isRunning = false;
             machine.myBoss.SetRunAnimation(isRunning);
+            machine.myBoss.ClearPath();
             Debug.Log("Exited Pursue State");
         }
     }

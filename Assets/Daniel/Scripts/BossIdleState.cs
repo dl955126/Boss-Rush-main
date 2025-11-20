@@ -4,7 +4,7 @@ namespace Daniel
 {
     public class BossIdleState : State
     {
-
+        bool idle;
         public BossIdleState(StateMachine m) : base(m)
         {
             machine = m;
@@ -13,8 +13,10 @@ namespace Daniel
         public override void OnEnter()
         {
             base.OnEnter();
+            idle = true;
+            machine.myBoss.backToIdle = false;
             Debug.Log("Entered Idle State");
-
+            machine.myBoss.SetIdleAnimations(idle);
             //decide what attack to use
             machine.myBoss.DecideAttack();
 
@@ -41,6 +43,8 @@ namespace Daniel
         public override void OnExit()
         {
             base.OnExit();
+            idle = false;
+            machine.myBoss.SetIdleAnimations(idle);
             Debug.Log("Exited Idle State");
         }
     }
