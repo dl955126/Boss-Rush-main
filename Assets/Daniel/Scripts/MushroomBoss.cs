@@ -38,6 +38,16 @@ namespace Daniel
         [SerializeField] GameObject slamDamager;
         public int attackIndex { private set; get; }
         public bool inMeleeRange { private set; get; }
+
+        [Header("Range Variables")]
+        [SerializeField] Transform orbitPoint;
+        [SerializeField] float orbitSpeed;
+        [SerializeField] float projectileSpeed;
+        [SerializeField] float timeBetweenProjectiles;
+        [SerializeField] GameObject projectilePrefab;
+        Vector3 orbitAxis = Vector3.up;
+        Vector3 orbitPosition = new Vector3(0, 0, 0);
+
         public bool backToIdle;
 
 
@@ -99,6 +109,11 @@ namespace Daniel
         public void SetAttackAnimations()
         {
             animator.SetTrigger("Attack");
+        }
+
+        public void SetRangedAnimations(bool inRanged)
+        {
+            animator.SetBool("Spinning", inRanged);
         }
 
 
@@ -196,6 +211,58 @@ namespace Daniel
             ResetBoss();
 
         }
+        //---------------------Range attack-----------------------------
+        public void RangeAttackOrbit()
+        {
+            transform.RotateAround(orbitPoint.position, orbitAxis, orbitSpeed * Time.deltaTime);
+        }
+
+        public void SetOrbitPosition()
+        {
+            float RandomZ = Random.Range(-15, 15);
+            float RandomX = 0;
+
+            int choosePosition = Random.Range(0, 2);
+
+            if(choosePosition == 0)
+            {
+                RandomX = -15;
+            }
+            else if(choosePosition == 1)
+            {
+                RandomX = 15;
+            }
+            
+            orbitPosition.x = RandomX;
+            orbitPosition.z = RandomZ;
+            transform.position = orbitPosition;
+            
+        }
+
+        public void RangedProjectile()
+        {
+            timeBetweenProjectiles += Time.deltaTime;
+            var dirToPlayer = (player.position - transform.position).normalized;
+
+            if (timeBetweenProjectiles >= 2)
+            {
+
+                GameObject projectile = Instantiate(projectilePrefab, transform.position, Quaternion.identity);
+                Rigidbody projectileRb = projectile.GetComponent<Rigidbody>();
+
+                if(projectileRb != null)
+                {
+                    projectileRb.AddForce(dirToPlayer * projectileSpeed, ForceMode.Impulse);
+                }
+
+                timeBetweenProjectiles = 0;
+            }
+        }
+
+        public void ResetProjectileTime()
+        {
+            timeBetweenProjectiles = 0;
+        }
 
         //---------------------animation events------------------------
         public void LaunchUp()
@@ -216,6 +283,11 @@ namespace Daniel
         public void IsSpinning()
         {
             isSpinning = true;
+        }
+
+        public void StopSpinning()
+        {
+            isSpinning = false;
         }
 
         public void SpinBoss()
