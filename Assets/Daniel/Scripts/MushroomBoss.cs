@@ -15,7 +15,6 @@ namespace Daniel
         [SerializeField] Animator animator;
         [SerializeField] Transform player;
         [SerializeField] NavMeshAgent agent;
-        [SerializeField] GameObject MeleeDamager;
         StateMachine myStateMachine;
         Rigidbody rb;
         NavMeshPath navPath;
@@ -26,13 +25,17 @@ namespace Daniel
         [SerializeField] float bossSpeed;
         [SerializeField] float jumpForce;
         [SerializeField] float rotationSpeed;
-        [SerializeField] float SlamForce;
+        [SerializeField] float SpinDuration;
+        [SerializeField] float minSlamForce;
+        [SerializeField] float maxSlamForce;
         public bool isSpinning { private set; get; }
         bool isJumping;
         float slowDownSpeed = 4;
         Vector3 targetVelocity;
 
         [Header("Melee Variables")]
+        [SerializeField] GameObject meleeDamager;
+        [SerializeField] GameObject slamDamager;
         public int attackIndex { private set; get; }
         public bool inMeleeRange { private set; get; }
         public bool backToIdle;
@@ -70,7 +73,7 @@ namespace Daniel
             targetVelocity = Vector3.zero;
         }
 
-        //change boss speed
+        //---------------------------change boss speed---------------
         public void SlowDownBoss()
         {
             
@@ -82,7 +85,7 @@ namespace Daniel
             targetVelocity = Vector3.zero;
         }
 
-        //handle animations
+        //--------------------------handle animations--------------------
         public void SetIdleAnimations(bool isIdle)
         {
             animator.SetBool("CompletedAttack", isIdle);
@@ -106,7 +109,7 @@ namespace Daniel
             transform.forward = newForward;
         }
 
-        //pursue functions
+        //----------------------pursue functions--------------------------
         public void GetPathToPlayer()
         {
             if(!agent.enabled || !agent.isOnNavMesh) return;
@@ -135,7 +138,7 @@ namespace Daniel
         }
 
 
-        //melee functions
+        //-------------------melee functions-----------------------
         public void SetInMeleeRange(bool MeleeRange)
         {
             inMeleeRange = MeleeRange;
@@ -149,13 +152,52 @@ namespace Daniel
 
         IEnumerator ComboAttack()
         {
-            MeleeDamager.SetActive(true);
+            meleeDamager.SetActive(true);
             yield return new WaitForSeconds(0.2f);
-            MeleeDamager.SetActive(false);
+            meleeDamager.SetActive(false);
 
         }
 
-        //animation events
+        IEnumerator SlamDamager()
+        {
+            slamDamager.SetActive(true);
+            yield return new WaitForSeconds(0.4f);
+            slamDamager.SetActive(false);
+        }
+
+
+        IEnumerator SlamAttack()
+        {
+            Debug.Log("Called slam attack");
+            yield return new WaitForSeconds(SpinDuration);
+            rb.useGravity = true;
+            rb.isKinematic = false;
+            isJumping = false;
+
+            var SlamDirection = (player.position - transform.position).normalized;
+            SlamDirection.y = 0;
+
+            var distanceToPlayer = Vector3.Distance(transform.position, player.position);
+
+            if(distanceToPlayer < 10)
+            {
+                Debug.Log("Close to player");
+                targetVelocity = SlamDirection * (minSlamForce + distanceToPlayer);
+            }
+            else
+            {
+                Debug.Log("Far to player");
+                targetVelocity = SlamDirection * (maxSlamForce + distanceToPlayer);
+            }
+            
+            yield return new WaitForSeconds(0.2f);
+
+            StartCoroutine(SlamDamager());
+            ResetBoss();
+
+        }
+
+        //---------------------animation events------------------------
         public void LaunchUp()
         {
             StopBoss();
@@ -163,7 +205,6 @@ namespace Daniel
             agent.enabled = false;
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }
-
         public void StopMidAir()
         {
             rb.useGravity = false;
@@ -182,24 +223,6 @@ namespace Daniel
             transform.Rotate(Vector3.up * rotationSpeed * Time.deltaTime);
         }
 
-        IEnumerator SlamAttack()
-        {
-            Debug.Log("Called slam attack");
-            yield return new WaitForSeconds(4);
-            rb.useGravity = true;
-            rb.isKinematic = false;
-            isJumping = false;
-
-            var SlamDirection = (player.position - transform.position).normalized;
-            SlamDirection.y = 0;
-
-            targetVelocity = (SlamDirection * SlamForce) + (Vector3.down * SlamForce);
-            yield return new WaitForSeconds(0.2f);
-            
-            StartCombo();
-            ResetBoss();
-
-        }
 
         public void ResetBoss()
         {
@@ -210,7 +233,7 @@ namespace Daniel
             backToIdle = true;
         }
 
-        //draw path
+        //------------------------draw path----------------------
         private void OnDrawGizmos()
         {
             if (navPath == null)

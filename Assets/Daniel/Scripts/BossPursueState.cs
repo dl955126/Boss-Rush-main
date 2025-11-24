@@ -5,6 +5,7 @@ namespace Daniel
 {
     public class BossPursueState : State
     {
+        float pursueTimer;
         float pathRecalc;
         bool isRunning;
 
@@ -15,12 +16,11 @@ namespace Daniel
 
         public override void OnEnter()
         {
+            isRunning = true;
             base.OnEnter();
             Debug.Log("Entered Pursue State");
             machine.myBoss.GetPathToPlayer();
-            isRunning = true;
-
-
+            
         }
 
         public override void OnUpdate()
@@ -28,6 +28,7 @@ namespace Daniel
             base.OnUpdate();
 
             pathRecalc += Time.deltaTime;
+            pursueTimer += Time.deltaTime;
             machine.myBoss.TurnToPlayer();
 
             if (pathRecalc > 1)
@@ -38,7 +39,7 @@ namespace Daniel
 
             machine.myBoss.SetRunAnimation(isRunning);
 
-            if (machine.myBoss.inMeleeRange)
+            if (machine.myBoss.inMeleeRange && pursueTimer > 0.2f)
             {
                 machine.ChangeState(new BossMeleeState(machine));
             }
