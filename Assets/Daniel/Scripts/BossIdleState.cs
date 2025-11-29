@@ -30,13 +30,19 @@ namespace Daniel
             {
                 if(machine.myBoss.attackIndex == 0)
                 {
-                    //machine.ChangeState(new BossRangeAttackState(machine));
-                    machine.ChangeState(new BossPursueState(machine));
-                }
-                if(machine.myBoss.attackIndex == 1)
-                {
-                    machine.ChangeState(new BossRangeAttackState(machine));
                     //machine.ChangeState(new BossPursueState(machine));
+                    //machine.ChangeState(new BossRangeAttackState(machine));
+                    machine.ChangeState(new BossExplosionState(machine));
+                }
+                if (machine.myBoss.attackIndex == 1)
+                {
+                    //machine.ChangeState(new BossRangeAttackState(machine));
+                    //machine.ChangeState(new BossPursueState(machine));
+                    machine.ChangeState(new BossExplosionState(machine));
+                }
+                if(machine.myBoss.attackIndex == 2)
+                {
+                    machine.ChangeState(new BossExplosionState(machine));
                 }
             }
         }

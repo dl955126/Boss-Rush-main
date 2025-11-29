@@ -48,7 +48,20 @@ namespace Daniel
         Vector3 orbitAxis = Vector3.up;
         Vector3 orbitPosition = new Vector3(0, 0, 0);
 
+        [Header("Explosive Variables")]
+        [SerializeField] GameObject explosive;
+        [SerializeField] GameObject explosiveDamager;
+        [SerializeField] float scaleDuration;
+        float elapsedExplosiveTime;
+        Vector3 targetScale = new Vector3(1.8f, 1.8f, 1.8f);
+        Vector3 initialScale;
+
+        [Header("Phases Variables")]
+        public int currentPhase = 1;
+        bool isInPhases2 = false;
+
         public bool backToIdle;
+        public bool ExplosionFinished;
 
 
         void Start()
@@ -79,7 +92,14 @@ namespace Daniel
 
         public void DecideAttack()
         {
-            attackIndex = Random.Range(0, 2);
+            if (currentPhase == 1)
+            {
+                attackIndex = Random.Range(0, 2);
+            }
+            else if(currentPhase == 2)
+            {
+                attackIndex = Random.Range(0, 3);
+            }
             targetVelocity = Vector3.zero;
         }
 
@@ -116,6 +136,10 @@ namespace Daniel
             animator.SetBool("Spinning", inRanged);
         }
 
+        public void SetExplodeAnimations(bool isExploding)
+        {
+            animator.SetBool("Explode", isExploding);
+        }
 
         public void TurnToPlayer()
         {
@@ -264,6 +288,41 @@ namespace Daniel
             timeBetweenProjectiles = 0;
         }
 
+        //---------------------explosion functions------------------------
+        public void SetExplosionPosition()
+        {
+            explosive.SetActive(true);
+            transform.position = orbitPoint.position;
+            initialScale = explosive.transform.localScale;
+        }
+
+        public void ChargeUpExplosion()
+        {
+            float t = elapsedExplosiveTime / scaleDuration;
+            explosive.transform.localScale = Vector3.Lerp(initialScale, targetScale, Mathf.Clamp01(t));
+            elapsedExplosiveTime += Time.deltaTime;
+
+            if(t >= 1)
+            {
+                explosive.SetActive(false);
+                StartCoroutine(EnableExplosiveDamager());
+            }
+        }
+
+        IEnumerator EnableExplosiveDamager()
+        {
+            explosiveDamager.SetActive(true);
+            yield return new WaitForSeconds(0.2f);
+            explosiveDamager.SetActive(false);
+            ExplosionFinished = true;
+        }
+
+        public void ResetExplosive()
+        {
+            elapsedExplosiveTime = 0;
+            explosive.transform.localScale = initialScale;
+        }
+
         //---------------------animation events------------------------
         public void LaunchUp()
         {
@@ -303,6 +362,17 @@ namespace Daniel
 
             animator.SetBool("CompletedAttack", true);
             backToIdle = true;
+        }
+
+        //-----------------------change phases---------------
+        public void ChangePhases(int damage, int currentHealth)
+        {
+            if(currentHealth < 50 && !isInPhases2)
+            {
+                Debug.Log("PHASE 2:");
+                currentPhase++;
+                isInPhases2 = true;
+            }
         }
 
         //------------------------draw path----------------------
