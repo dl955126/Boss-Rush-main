@@ -42,12 +42,12 @@ namespace Daniel
 
         [Header("Range Variables")]
         [SerializeField] Transform orbitPoint;
+        [SerializeField] Transform[] orbitPostions;
         [SerializeField] float orbitSpeed;
         [SerializeField] float projectileSpeed;
         [SerializeField] float timeBetweenProjectiles;
         [SerializeField] GameObject projectilePrefab;
         Vector3 orbitAxis = Vector3.up;
-        Vector3 orbitPosition = new Vector3(0, 0, 0);
 
         [Header("Explosive Variables")]
         [SerializeField] GameObject explosive;
@@ -254,24 +254,10 @@ namespace Daniel
 
         public void SetOrbitPosition()
         {
-            float RandomZ = Random.Range(-15, 15);
-            float RandomX = 0;
+            int randomPosition = Random.Range(0, 4);
 
-            int choosePosition = Random.Range(0, 2);
+            transform.position = orbitPostions[randomPosition].position;
 
-            if(choosePosition == 0)
-            {
-                RandomX = -15;
-            }
-            else if(choosePosition == 1)
-            {
-                RandomX = 15;
-            }
-            
-            orbitPosition.x = RandomX;
-            orbitPosition.z = RandomZ;
-            transform.position = orbitPosition;
-            
         }
 
         public void RangedProjectile()
