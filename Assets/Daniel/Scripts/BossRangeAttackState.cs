@@ -14,7 +14,7 @@ namespace Daniel
         {
             base.OnEnter();
             machine.myBoss.SetRangedAnimations(true);
-            machine.myBoss.SetOrbitPosition();
+            machine.myBoss.SetOrbitPosition(machine.myBoss.currentPhase);
             Debug.Log("Entered Range Attack State");
 
         }

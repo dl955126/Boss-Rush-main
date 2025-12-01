@@ -47,6 +47,7 @@ namespace Daniel
         [SerializeField] float projectileSpeed;
         [SerializeField] float timeBetweenProjectiles;
         [SerializeField] GameObject projectilePrefab;
+        [SerializeField] GameObject phase2Projectile;
         Vector3 orbitAxis = Vector3.up;
 
         [Header("Explosive Variables")]
@@ -60,6 +61,10 @@ namespace Daniel
         [Header("Phases Variables")]
         public int currentPhase = 1;
         bool isInPhases2 = false;
+
+        [Header("Clone Variables")]
+        public bool isCloneMelee { private set; get; }
+        public bool isCloneRanged { private set; get; }
 
         public bool backToIdle;
         public bool ExplosionFinished;
@@ -93,6 +98,9 @@ namespace Daniel
 
         public void DecideAttack()
         {
+            isCloneMelee = false;
+            isCloneRanged = false;
+
             if (currentPhase == 1)
             {
                 attackIndex = Random.Range(0, 2);
@@ -244,6 +252,7 @@ namespace Daniel
 
         public void SlamAttackPhase2()
         {
+            isCloneMelee = true;
             Instantiate(bossClone, transform.position, Quaternion.identity);
         }
         //---------------------Range attack-----------------------------
@@ -252,11 +261,17 @@ namespace Daniel
             transform.RotateAround(orbitPoint.position, orbitAxis, orbitSpeed * Time.deltaTime);
         }
 
-        public void SetOrbitPosition()
+        public void SetOrbitPosition(int phase)
         {
             int randomPosition = Random.Range(0, 4);
 
             transform.position = orbitPostions[randomPosition].position;
+
+            if(phase == 2)
+            {
+                RangedAttackPhase2();
+                projectilePrefab = phase2Projectile;
+            }
 
         }
 
@@ -283,6 +298,13 @@ namespace Daniel
         public void ResetProjectileTime()
         {
             timeBetweenProjectiles = 0;
+        }
+
+        public void RangedAttackPhase2()
+        {
+            isCloneRanged = true;
+            GameObject clone = Instantiate(bossClone, transform.position, Quaternion.identity);
+            clone.GetComponent<CloneLogic>().projectilePrefab = phase2Projectile;
         }
 
         //---------------------explosion functions------------------------
