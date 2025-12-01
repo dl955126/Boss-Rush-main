@@ -36,6 +36,7 @@ namespace Daniel
         [Header("Melee Variables")]
         [SerializeField] GameObject meleeDamager;
         [SerializeField] GameObject slamDamager;
+        [SerializeField] GameObject bossClone;
         public int attackIndex { private set; get; }
         public bool inMeleeRange { private set; get; }
 
@@ -205,10 +206,15 @@ namespace Daniel
         }
 
 
-        IEnumerator SlamAttack()
+        IEnumerator SlamAttack(int phase)
         {
             Debug.Log("Called slam attack");
             yield return new WaitForSeconds(SpinDuration);
+            //call slam attack2
+            if(phase == 2)
+            {
+                SlamAttackPhase2();
+            }
             rb.useGravity = true;
             rb.isKinematic = false;
             isJumping = false;
@@ -234,6 +240,11 @@ namespace Daniel
             StartCoroutine(SlamDamager());
             ResetBoss();
 
+        }
+
+        public void SlamAttackPhase2()
+        {
+            Instantiate(bossClone, transform.position, Quaternion.identity);
         }
         //---------------------Range attack-----------------------------
         public void RangeAttackOrbit()
@@ -336,7 +347,7 @@ namespace Daniel
             rb.useGravity = false;
             rb.isKinematic = true;
 
-            StartCoroutine(SlamAttack());
+            StartCoroutine(SlamAttack(currentPhase));
         }
 
         public void IsSpinning()
