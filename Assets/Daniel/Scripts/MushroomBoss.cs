@@ -58,9 +58,26 @@ namespace Daniel
         Vector3 targetScale = new Vector3(1.8f, 1.8f, 1.8f);
         Vector3 initialScale;
 
+        [Header("Ultimate Variables")]
+        [SerializeField] GameObject ultimateLaser;
+        [SerializeField] float chargeDuration;
+        [SerializeField] float SpinSpeed;
+        [SerializeField] GameObject ultimateShield;
+        float elapsedUltimateTime;
+        Vector3 ultimateLaserPosition;
+        Vector3 ultimateIntialScale;
+        Vector3 ultimateTargetScale = new Vector3(0.4f, 0.4f, 0.5f);
+        Vector3 ultimateLaserMidSize = new Vector3(0.4f, 0.4f, 7f);
+        Vector3 ultimateLaserMaxSize = new Vector3(0.8f, 0.8f, 7f);
+        [SerializeField] float zOffset;
+        [SerializeField] float yOffset;
+        bool hasUsedUltimate = false;
+        public bool isUltimateCharged { private set; get; } = false;
+
         [Header("Phases Variables")]
         public int currentPhase = 1;
         bool isInPhases2 = false;
+        bool isInPhase3 = false;
 
         [Header("Clone Variables")]
         public bool isCloneMelee { private set; get; }
@@ -109,6 +126,10 @@ namespace Daniel
             {
                 attackIndex = Random.Range(0, 3);
             }
+            else if (currentPhase == 3)
+            {
+                attackIndex = 3;
+            }
             targetVelocity = Vector3.zero;
         }
 
@@ -148,6 +169,11 @@ namespace Daniel
         public void SetExplodeAnimations(bool isExploding)
         {
             animator.SetBool("Explode", isExploding);
+        }
+
+        public void SetUltimateAnimations(bool isUltimate)
+        {
+            animator.SetBool("Ultimate", isUltimate);
         }
 
         public void TurnToPlayer()
@@ -219,7 +245,7 @@ namespace Daniel
             Debug.Log("Called slam attack");
             yield return new WaitForSeconds(SpinDuration);
             //call slam attack2
-            if(phase == 2)
+            if(phase >= 2)
             {
                 SlamAttackPhase2();
             }
@@ -267,7 +293,7 @@ namespace Daniel
 
             transform.position = orbitPostions[randomPosition].position;
 
-            if(phase == 2)
+            if(phase >= 2)
             {
                 RangedAttackPhase2();
                 projectilePrefab = phase2Projectile;
@@ -317,6 +343,7 @@ namespace Daniel
 
         public void ChargeUpExplosion()
         {
+            
             float t = elapsedExplosiveTime / scaleDuration;
             explosive.transform.localScale = Vector3.Lerp(initialScale, targetScale, Mathf.Clamp01(t));
             elapsedExplosiveTime += Time.deltaTime;
@@ -340,6 +367,61 @@ namespace Daniel
         {
             elapsedExplosiveTime = 0;
             explosive.transform.localScale = initialScale;
+        }
+        //-----------------------Ultimate Attack------------------------
+        public void EnterUltimate()
+        {
+            ultimateShield.SetActive(true);
+            ultimateLaser.SetActive(true);
+            transform.position = orbitPoint.position;
+            ultimateLaserPosition = ultimateLaser.transform.position;
+            ultimateIntialScale = ultimateLaser.transform.localScale;
+
+        }
+        public void ChargeUpUltimate()
+        {
+            
+            float t = elapsedUltimateTime / chargeDuration;
+            ultimateLaser.transform.localScale = Vector3.Lerp(ultimateIntialScale, ultimateTargetScale, Mathf.Clamp01(t));
+            elapsedUltimateTime += Time.deltaTime;
+
+            if(t >= 1)
+            {
+                
+                if (!hasUsedUltimate)
+                {
+                    hasUsedUltimate = true;
+                    ultimateLaser.transform.position = transform.position + transform.forward * zOffset + Vector3.up * yOffset;
+                }
+
+                isUltimateCharged = true;
+
+            }
+        }
+
+        public void UseUltimate()
+        {
+            ultimateLaser.transform.localScale = ultimateLaserMidSize;
+            transform.Rotate(Vector3.up * SpinSpeed * Time.deltaTime);
+        }
+
+        public void SpeedUpLaser()
+        {
+            if(SpinSpeed <= 500)
+            {
+                SpinSpeed += Time.deltaTime * 10;
+            }
+
+            if(SpinSpeed >= 300)
+            {
+                ultimateLaser.transform.localScale = ultimateLaserMaxSize;
+            }
+        }
+
+        public void ExitUltimate()
+        {
+            ultimateLaser.SetActive(false);
+            ultimateShield.SetActive(false);
         }
 
         //---------------------animation events------------------------
@@ -386,11 +468,18 @@ namespace Daniel
         //-----------------------change phases---------------
         public void ChangePhases(int damage, int currentHealth)
         {
-            if(currentHealth < 50 && !isInPhases2)
+            if(currentHealth <= 50 && !isInPhases2)
             {
-                Debug.Log("PHASE 2:");
+                Debug.Log("PHASE 2");
                 currentPhase++;
                 isInPhases2 = true;
+            }
+
+            if(currentHealth <= 20 && !isInPhase3)
+            {
+                Debug.Log("PHASE 3");
+                currentPhase++;
+                isInPhase3 = true;
             }
         }
 

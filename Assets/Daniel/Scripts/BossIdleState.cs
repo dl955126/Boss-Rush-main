@@ -46,6 +46,10 @@ namespace Daniel
                     //machine.ChangeState(new BossRangeAttackState(machine));
                     machine.ChangeState(new BossExplosionState(machine));
                 }
+                if(machine.myBoss.attackIndex == 3)
+                {
+                    machine.ChangeState(new BossUltimateAttack(machine));
+                }
             }
         }
 
