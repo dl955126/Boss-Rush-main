@@ -4,6 +4,7 @@ using brolive;
 using TreeEditor;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Events;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
 
@@ -17,6 +18,7 @@ namespace Daniel
         [SerializeField] NavMeshAgent agent;
         StateMachine myStateMachine;
         Rigidbody rb;
+        CapsuleCollider bossCollider;
         NavMeshPath navPath;
         Queue<Vector3> remainingPoints;
         Vector3 currentTargetPoint;
@@ -84,6 +86,11 @@ namespace Daniel
         public bool isCloneMelee { private set; get; }
         public bool isCloneRanged { private set; get; }
 
+        [Header("Particles Events")]
+        [SerializeField] UnityEvent OnSpin;
+        bool hasFired = false;
+
+
         public bool backToIdle;
         public bool ExplosionFinished;
 
@@ -94,6 +101,7 @@ namespace Daniel
             remainingPoints = new Queue<Vector3>();
             player = FindAnyObjectByType<PlayerLogic>().transform;
             rb = GetComponent<Rigidbody>();
+            bossCollider = GetComponent<CapsuleCollider>();
 
             myStateMachine = new StateMachine(this);
             myStateMachine.ChangeState(new BossIdleState(myStateMachine));
@@ -249,9 +257,15 @@ namespace Daniel
         IEnumerator SlamAttack(int phase)
         {
             Debug.Log("Called slam attack");
-            yield return new WaitForSeconds(SpinDuration);
+            OnSpin?.Invoke();
+            //SpinDuration = 2.5
+            yield return new WaitForSeconds(1);
+            OnSpin?.Invoke();
+            yield return new WaitForSeconds(1);
+            OnSpin?.Invoke();
+            yield return new WaitForSeconds(0.5f);
             //call slam attack2
-            if(phase >= 2)
+            if (phase >= 2)
             {
                 SlamAttackPhase2();
             }
@@ -310,21 +324,32 @@ namespace Daniel
         public void RangedProjectile()
         {
             timeBetweenProjectiles += Time.deltaTime;
+
+
+            if (timeBetweenProjectiles >= 1.5f && !hasFired)
+            {
+                StartCoroutine(RangedCoroutine());
+                hasFired = true;
+            }
+        }
+
+        IEnumerator RangedCoroutine()
+        {
+            OnSpin?.Invoke();
+            yield return new WaitForSeconds(0.5f);
+
             var dirToPlayer = (player.position - transform.position).normalized;
 
-            if (timeBetweenProjectiles >= 2)
+            GameObject projectile = Instantiate(projectilePrefab, transform.position, Quaternion.identity);
+            Rigidbody projectileRb = projectile.GetComponent<Rigidbody>();
+
+            if (projectileRb != null)
             {
-
-                GameObject projectile = Instantiate(projectilePrefab, transform.position, Quaternion.identity);
-                Rigidbody projectileRb = projectile.GetComponent<Rigidbody>();
-
-                if(projectileRb != null)
-                {
-                    projectileRb.AddForce(dirToPlayer * projectileSpeed, ForceMode.Impulse);
-                }
-
-                timeBetweenProjectiles = 0;
+                projectileRb.AddForce(dirToPlayer * projectileSpeed, ForceMode.Impulse);
             }
+
+            timeBetweenProjectiles = 0;
+            hasFired = false;
         }
 
         public void ResetProjectileTime()
@@ -379,6 +404,7 @@ namespace Daniel
         {
             ultimateShield.SetActive(true);
             ultimateLaser.SetActive(true);
+            bossCollider.enabled = false;
             transform.position = orbitPoint.position;
             ultimateLaserPosition = ultimateLaser.transform.position;
             ultimateIntialScale = ultimateLaser.transform.localScale;
@@ -430,6 +456,7 @@ namespace Daniel
         {
             ultimateLaser.SetActive(false);
             ultimateShield.SetActive(false);
+            bossCollider.enabled = true;
         }
 
         IEnumerator EnableShieldDamager()
