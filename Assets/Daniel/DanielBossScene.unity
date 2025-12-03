@@ -1268,6 +1268,9 @@ PrefabInstance:
       addedObject: {fileID: 10863663}
     - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: c84fbe2079f1253469d3c5ad4bbf3399, type: 3}
       insertIndex: -1
+      addedObject: {fileID: 1480198844}
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: c84fbe2079f1253469d3c5ad4bbf3399, type: 3}
+      insertIndex: -1
       addedObject: {fileID: 1981022609}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: c84fbe2079f1253469d3c5ad4bbf3399, type: 3}
@@ -1303,7 +1306,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb936639cdd91de4b9956f37ee2ea8e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 13
+  maxHealth: 80
   iTime: 0.5
   flashMaterial: {fileID: 2100000, guid: f9019e987aeeba0478a8b5ec35aafbff, type: 2}
   renderers:
@@ -1467,7 +1470,8 @@ MonoBehaviour:
   ultimateLaser: {fileID: 10863662}
   chargeDuration: 5
   SpinSpeed: 150
-  ultimateShield: {fileID: 1981022608}
+  ultimateShield: {fileID: 1480198843}
+  ultimateShieldDamager: {fileID: 1981022608}
   zOffset: 12.5
   yOffset: 1.4
   currentPhase: 1
@@ -2504,14 +2508,13 @@ GameObject:
   - component: {fileID: 1480198848}
   - component: {fileID: 1480198847}
   - component: {fileID: 1480198846}
-  - component: {fileID: 1480198849}
   m_Layer: 7
   m_Name: ShieldVisual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1480198844
 Transform:
   m_ObjectHideFlags: 0
@@ -2521,11 +2524,11 @@ Transform:
   m_GameObject: {fileID: 1480198843}
   serializedVersion: 2
   m_LocalRotation: {x: 0.35355338, y: -0.1464466, z: 0.35355338, w: 0.8535535}
-  m_LocalPosition: {x: 0, y: 0.042399704, z: 0}
-  m_LocalScale: {x: 0.59999996, y: 0.59999996, z: 0.59999996}
+  m_LocalPosition: {x: 0, y: 0.5812785, z: 0}
+  m_LocalScale: {x: 1.3199998, y: 1.3199999, z: 1.3199999}
   m_ConstrainProportionsScale: 1
   m_Children: []
-  m_Father: {fileID: 1981022609}
+  m_Father: {fileID: 667549650}
   m_LocalEulerAnglesHint: {x: 45, y: 0, z: 45}
 --- !u!65 &1480198846
 BoxCollider:
@@ -2601,37 +2604,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1480198843}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!114 &1480198849
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1480198843}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bb936639cdd91de4b9956f37ee2ea8e0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxHealth: 1000
-  iTime: 0.5
-  flashMaterial: {fileID: 0}
-  renderers: []
-  damageEffectPrefab: {fileID: 0}
-  hurtSounds: {fileID: 0}
-  deathSounds: {fileID: 0}
-  OnInitialize:
-    m_PersistentCalls:
-      m_Calls: []
-  OnHit:
-    m_PersistentCalls:
-      m_Calls: []
-  OnDeath:
-    m_PersistentCalls:
-      m_Calls: []
-  OnHealthChanged:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &1514649218
 GameObject:
   m_ObjectHideFlags: 0
@@ -3496,7 +3468,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 6154631fc40175a40a911c9f4750239f, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -3769,7 +3741,7 @@ GameObject:
   - component: {fileID: 1981022611}
   - component: {fileID: 1981022610}
   m_Layer: 9
-  m_Name: Shield
+  m_Name: ShieldDamager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3787,8 +3759,7 @@ Transform:
   m_LocalPosition: {x: 0, y: 0.488, z: 0}
   m_LocalScale: {x: 2.2, y: 2.2, z: 2.2}
   m_ConstrainProportionsScale: 1
-  m_Children:
-  - {fileID: 1480198844}
+  m_Children: []
   m_Father: {fileID: 667549650}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1981022610
@@ -3803,7 +3774,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36d91920f1168024cad6f2f46528b94c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damageAmount: 0
+  damageAmount: 1
   knockbackForce: 15
   hitEffectPrefab: {fileID: 0}
   hitSounds: {fileID: 0}

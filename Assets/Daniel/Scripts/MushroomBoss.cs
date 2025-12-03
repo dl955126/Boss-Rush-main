@@ -63,6 +63,7 @@ namespace Daniel
         [SerializeField] float chargeDuration;
         [SerializeField] float SpinSpeed;
         [SerializeField] GameObject ultimateShield;
+        [SerializeField] GameObject ultimateShieldDamager;
         float elapsedUltimateTime;
         Vector3 ultimateLaserPosition;
         Vector3 ultimateIntialScale;
@@ -174,6 +175,11 @@ namespace Daniel
         public void SetUltimateAnimations(bool isUltimate)
         {
             animator.SetBool("Ultimate", isUltimate);
+        }
+
+        public void SetDefeatedAnimations(bool isDefeated)
+        {
+            animator.SetBool("Defeated", isDefeated);
         }
 
         public void TurnToPlayer()
@@ -403,6 +409,8 @@ namespace Daniel
         {
             ultimateLaser.transform.localScale = ultimateLaserMidSize;
             transform.Rotate(Vector3.up * SpinSpeed * Time.deltaTime);
+
+            StartCoroutine(EnableShieldDamager());
         }
 
         public void SpeedUpLaser()
@@ -422,6 +430,13 @@ namespace Daniel
         {
             ultimateLaser.SetActive(false);
             ultimateShield.SetActive(false);
+        }
+
+        IEnumerator EnableShieldDamager()
+        {
+            ultimateShieldDamager.SetActive(true);
+            yield return new WaitForSeconds(0.2f);
+            ultimateShieldDamager.SetActive(false);
         }
 
         //---------------------animation events------------------------
@@ -475,7 +490,7 @@ namespace Daniel
                 isInPhases2 = true;
             }
 
-            if(currentHealth <= 20 && !isInPhase3)
+            if(currentHealth <= 10 && !isInPhase3)
             {
                 Debug.Log("PHASE 3");
                 currentPhase++;
