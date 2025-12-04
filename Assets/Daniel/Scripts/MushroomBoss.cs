@@ -7,6 +7,7 @@ using UnityEngine.AI;
 using UnityEngine.Events;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
+using static UnityEngine.ParticleSystem;
 
 namespace Daniel
 {
@@ -86,12 +87,8 @@ namespace Daniel
         public bool isCloneMelee { private set; get; }
         public bool isCloneRanged { private set; get; }
 
-        [Header("Particles Events")]
-        [SerializeField] UnityEvent OnSpin;
-        [SerializeField] UnityEvent OnEnterPhase2;
-        [SerializeField] UnityEvent OnEnterExplosion;
-        [SerializeField] UnityEvent<float> OnCharginExplosion;
-        [SerializeField] UnityEvent OnExitExplosion;
+        [Header("Particles Variables")]
+        EmitParticles particles;
         bool hasFired = false;
         public bool hasEnabledPhase2 = false;
 
@@ -105,6 +102,7 @@ namespace Daniel
             navPath = new NavMeshPath();
             remainingPoints = new Queue<Vector3>();
             player = FindAnyObjectByType<PlayerLogic>().transform;
+            particles = FindAnyObjectByType<EmitParticles>();
             rb = GetComponent<Rigidbody>();
             bossCollider = GetComponent<CapsuleCollider>();
 
@@ -262,12 +260,12 @@ namespace Daniel
         IEnumerator SlamAttack(int phase)
         {
             Debug.Log("Called slam attack");
-            OnSpin?.Invoke();
+            particles.PlaySpinParticles();
             //SpinDuration = 2.5
             yield return new WaitForSeconds(1);
-            OnSpin?.Invoke();
+            particles.PlaySpinParticles();
             yield return new WaitForSeconds(1);
-            OnSpin?.Invoke();
+            particles.PlaySpinParticles();
             yield return new WaitForSeconds(0.5f);
             //call slam attack2
             if (phase >= 2)
@@ -340,7 +338,8 @@ namespace Daniel
 
         IEnumerator RangedCoroutine()
         {
-            OnSpin?.Invoke();
+            //OnSpin?.Invoke();
+            particles.PlaySpinParticles();
             yield return new WaitForSeconds(0.5f);
 
             var dirToPlayer = (player.position - transform.position).normalized;
@@ -373,7 +372,8 @@ namespace Daniel
         public void SetExplosionPosition()
         {
             explosive.SetActive(true);
-            OnEnterExplosion?.Invoke();
+            particles.PlayExplosiveCharge();
+            //OnEnterExplosion?.Invoke();
             transform.position = orbitPoint.position;
             initialScale = explosive.transform.localScale;
         }
@@ -382,7 +382,8 @@ namespace Daniel
         {
             
             float t = elapsedExplosiveTime / scaleDuration;
-            OnCharginExplosion?.Invoke(t);
+            particles.ExplosiveChargeParticles(t);
+            //OnCharginExplosion?.Invoke(t);
             explosive.transform.localScale = Vector3.Lerp(initialScale, targetScale, Mathf.Clamp01(t));
             elapsedExplosiveTime += Time.deltaTime;
 
@@ -397,7 +398,8 @@ namespace Daniel
         IEnumerator EnableExplosiveDamager()
         {
             explosiveDamager.SetActive(true);
-            OnExitExplosion?.Invoke();
+            particles.PlayEndExplosion();
+            //OnExitExplosion?.Invoke();
             yield return new WaitForSeconds(0.2f);
             explosiveDamager.SetActive(false);
             ExplosionFinished = true;
@@ -537,7 +539,8 @@ namespace Daniel
 
         public void EnablePhase2Particle()
         {
-            OnEnterPhase2?.Invoke();
+            particles.PlayPhase2Particles();
+            //OnEnterPhase2?.Invoke();
         }
 
         //------------------------draw path----------------------

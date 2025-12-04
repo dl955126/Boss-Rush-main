@@ -9,6 +9,7 @@ namespace Daniel
         [SerializeField] Transform player;
         [SerializeField] GameObject damager;
         [SerializeField] Transform orbitPoint;
+        [SerializeField] ParticleSystem cloneParticle;
         public GameObject projectilePrefab;
         MushroomBoss myBoss;
         Rigidbody rb;
@@ -26,17 +27,20 @@ namespace Daniel
         private void Awake()
         {
             myBoss = FindAnyObjectByType<MushroomBoss>();
+            
         }
         private void Start()
         {
             anim = GetComponent<Animator>();
             player = FindAnyObjectByType<PlayerLogic>().transform;
             rb = GetComponent<Rigidbody>();
-            orbitPoint = FindAnyObjectByType<OrbitPoint>().transform; 
+            orbitPoint = FindAnyObjectByType<OrbitPoint>().transform;
+            cloneParticle.Play();
 
             if (myBoss.isCloneMelee)
             {
                 StartCoroutine(SlamAttack());
+                
             }
             
         }
@@ -69,6 +73,7 @@ namespace Daniel
 
         IEnumerator SlamAttack()
         {
+            cloneParticle.Play();
             yield return new WaitForSeconds(1f);
 
             var SlamDirection = (player.position - transform.position).normalized;
