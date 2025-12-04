@@ -88,7 +88,12 @@ namespace Daniel
 
         [Header("Particles Events")]
         [SerializeField] UnityEvent OnSpin;
+        [SerializeField] UnityEvent OnEnterPhase2;
+        [SerializeField] UnityEvent OnEnterExplosion;
+        [SerializeField] UnityEvent<float> OnCharginExplosion;
+        [SerializeField] UnityEvent OnExitExplosion;
         bool hasFired = false;
+        public bool hasEnabledPhase2 = false;
 
 
         public bool backToIdle;
@@ -368,6 +373,7 @@ namespace Daniel
         public void SetExplosionPosition()
         {
             explosive.SetActive(true);
+            OnEnterExplosion?.Invoke();
             transform.position = orbitPoint.position;
             initialScale = explosive.transform.localScale;
         }
@@ -376,12 +382,14 @@ namespace Daniel
         {
             
             float t = elapsedExplosiveTime / scaleDuration;
+            OnCharginExplosion?.Invoke(t);
             explosive.transform.localScale = Vector3.Lerp(initialScale, targetScale, Mathf.Clamp01(t));
             elapsedExplosiveTime += Time.deltaTime;
 
             if(t >= 1)
             {
                 explosive.SetActive(false);
+                
                 StartCoroutine(EnableExplosiveDamager());
             }
         }
@@ -389,6 +397,7 @@ namespace Daniel
         IEnumerator EnableExplosiveDamager()
         {
             explosiveDamager.SetActive(true);
+            OnExitExplosion?.Invoke();
             yield return new WaitForSeconds(0.2f);
             explosiveDamager.SetActive(false);
             ExplosionFinished = true;
@@ -515,6 +524,7 @@ namespace Daniel
                 Debug.Log("PHASE 2");
                 currentPhase++;
                 isInPhases2 = true;
+                hasEnabledPhase2 = true;
             }
 
             if(currentHealth <= 10 && !isInPhase3)
@@ -523,6 +533,11 @@ namespace Daniel
                 currentPhase++;
                 isInPhase3 = true;
             }
+        }
+
+        public void EnablePhase2Particle()
+        {
+            OnEnterPhase2?.Invoke();
         }
 
         //------------------------draw path----------------------
