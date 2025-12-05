@@ -415,7 +415,7 @@ namespace Daniel
         {
             ultimateShield.SetActive(true);
             ultimateLaser.SetActive(true);
-            bossCollider.enabled = false;
+
             transform.position = orbitPoint.position;
             ultimateLaserPosition = ultimateLaser.transform.position;
             ultimateIntialScale = ultimateLaser.transform.localScale;
@@ -431,19 +431,22 @@ namespace Daniel
             if(t >= 1)
             {
                 
+
                 if (!hasUsedUltimate)
                 {
                     hasUsedUltimate = true;
                     ultimateLaser.transform.position = transform.position + transform.forward * zOffset + Vector3.up * yOffset;
+                    particles.PlayUltimateParticles();
                 }
 
                 isUltimateCharged = true;
-
+                
             }
         }
 
         public void UseUltimate()
         {
+            
             ultimateLaser.transform.localScale = ultimateLaserMidSize;
             transform.Rotate(Vector3.up * SpinSpeed * Time.deltaTime);
 
@@ -465,6 +468,7 @@ namespace Daniel
 
         public void ExitUltimate()
         {
+            particles.StopUltimateParticles();
             ultimateLaser.SetActive(false);
             ultimateShield.SetActive(false);
             bossCollider.enabled = true;
@@ -521,7 +525,7 @@ namespace Daniel
         //-----------------------change phases---------------
         public void ChangePhases(int damage, int currentHealth)
         {
-            if(currentHealth <= 50 && !isInPhases2)
+            if(currentHealth <= 60 && !isInPhases2)
             {
                 Debug.Log("PHASE 2");
                 currentPhase++;
@@ -529,9 +533,10 @@ namespace Daniel
                 hasEnabledPhase2 = true;
             }
 
-            if(currentHealth <= 10 && !isInPhase3)
+            if(currentHealth <= 6 && !isInPhase3)
             {
                 Debug.Log("PHASE 3");
+                bossCollider.enabled = false;
                 currentPhase++;
                 isInPhase3 = true;
             }

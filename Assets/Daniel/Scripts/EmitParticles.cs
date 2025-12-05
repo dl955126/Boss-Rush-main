@@ -8,6 +8,7 @@ namespace Daniel
         [SerializeField] ParticleSystem phase2Particles;
         [SerializeField] ParticleSystem ExplosiveCharge;
         [SerializeField] ParticleSystem EndExplosion;
+        [SerializeField] ParticleSystem UltimateParticles;
         float startRadius = 3f;
         float endRadius = 10f;
 
@@ -40,6 +41,17 @@ namespace Daniel
         public void PlayEndExplosion()
         {
             EndExplosion.Play();
+        }
+
+        public void PlayUltimateParticles()
+        {
+            UltimateParticles.Play();
+            Debug.Log("PLAY ULTIMATE PARTICLES");
+        }
+
+        public void StopUltimateParticles()
+        {
+            UltimateParticles.Stop();
         }
     }
 }
